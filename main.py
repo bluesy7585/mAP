@@ -19,8 +19,10 @@ parser.add_argument('-q', '--quiet', help="minimalistic console output.", action
 parser.add_argument('-i', '--ignore', nargs='+', type=str, help="ignore a list of classes.")
 # argparse receiving list of classes with specific IoU (e.g., python main.py --set-class-iou person 0.7)
 parser.add_argument('--set-class-iou', nargs='+', type=str, help="set IoU for a specific class.")
+parser.add_argument('-p', dest="pred_dir",type=str, help="prediction file dir.",default='predicted/')
 args = parser.parse_args()
 
+prediction_dir = args.pred_dir
 # if there are no classes to ignore then replace None by empty list
 if args.ignore is None:
     args.ignore = []
@@ -350,8 +352,9 @@ for txt_file in ground_truth_files_list:
     file_id = txt_file.split(".txt",1)[0]
     file_id = os.path.basename(os.path.normpath(file_id))
     # check if there is a correspondent predicted objects file
-    if not os.path.exists('predicted/' + file_id + ".txt"):
-        error_msg = "Error. File not found: predicted/" + file_id + ".txt\n"
+    file_name = os.path.join(prediction_dir, file_id + ".txt")
+    if not os.path.exists(file_name):
+        error_msg = "Error. File not found:{}".format(file_name) + "\n"
         error_msg += "(You can avoid this error message by running extra/intersect-gt-and-pred.py)"
         error(error_msg)
     lines_list = file_lines_to_list(txt_file)
@@ -438,7 +441,9 @@ if specific_iou_flagged:
      Load each of the predicted files into a temporary ".json" file.
 """
 # get a list with the predicted files
-predicted_files_list = glob.glob('predicted/*.txt')
+dir = os.path.join(prediction_dir, '*.txt')
+#print(dir)
+predicted_files_list = glob.glob(dir)#'predicted/*.txt')
 predicted_files_list.sort()
 
 for class_index, class_name in enumerate(gt_classes):
