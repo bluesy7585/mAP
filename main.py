@@ -20,9 +20,11 @@ parser.add_argument('-i', '--ignore', nargs='+', type=str, help="ignore a list o
 # argparse receiving list of classes with specific IoU (e.g., python main.py --set-class-iou person 0.7)
 parser.add_argument('--set-class-iou', nargs='+', type=str, help="set IoU for a specific class.")
 parser.add_argument('-p', dest="pred_dir",type=str, help="prediction file dir.",default='predicted/')
+parser.add_argument('-gt', dest="ground_true_dir",type=str, help="ground true file dir.",default='ground-truth/')
 args = parser.parse_args()
 
 prediction_dir = args.pred_dir
+ground_true_dir = args.ground_true_dir
 # if there are no classes to ignore then replace None by empty list
 if args.ignore is None:
     args.ignore = []
@@ -338,8 +340,9 @@ if show_animation:
      Load each of the ground-truth files into a temporary ".json" file.
      Create a list of all the class names present in the ground-truth (gt_classes).
 """
+gt_dir = os.path.join(ground_true_dir,'*.txt')
 # get a list with the ground-truth files
-ground_truth_files_list = glob.glob('ground-truth/*.txt')
+ground_truth_files_list = glob.glob(gt_dir)#'ground-truth/*.txt')
 if len(ground_truth_files_list) == 0:
     error("Error: No ground-truth files found!")
 ground_truth_files_list.sort()
@@ -454,8 +457,9 @@ for class_index, class_name in enumerate(gt_classes):
         file_id = txt_file.split(".txt",1)[0]
         file_id = os.path.basename(os.path.normpath(file_id))
         if class_index == 0:
-            if not os.path.exists('ground-truth/' + file_id + ".txt"):
-                error_msg = "Error. File not found: ground-truth/" +    file_id + ".txt\n"
+            file_name = os.path.join(ground_true_dir, file_id + ".txt")
+            if not os.path.exists(file_name):#'ground-truth/' + file_id + ".txt"):
+                error_msg = "Error. File not found:{}".format(file_name) + "\n"
                 error_msg += "(You can avoid this error message by running extra/intersect-gt-and-pred.py)"
                 error(error_msg)
         lines = file_lines_to_list(txt_file)
